@@ -3,7 +3,13 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-const SOURCES = ["/ai1.mp4", "/ai5.mp4", "/ai2.mp4", "/ai3.mp4", "/ai4.mp4",]
+const SOURCES = [
+  `${import.meta.env.BASE_URL}ai1.mp4`,
+  `${import.meta.env.BASE_URL}ai2.mp4`,
+  `${import.meta.env.BASE_URL}ai3.mp4`,
+  `${import.meta.env.BASE_URL}ai4.mp4`,
+  `${import.meta.env.BASE_URL}ai5.mp4`,
+];
 
 function BackgroundVideo() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -12,17 +18,22 @@ function BackgroundVideo() {
   const next = () => setI((p) => (p + 1) % SOURCES.length);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const v = videoRef.current;
+    if (!v) return;
 
     const handleEnded = () => next();
-    video.addEventListener("ended", handleEnded);
+    v.addEventListener("ended", handleEnded);
 
-    video.src = SOURCES[i];
-    video.load();
-    video.play().catch(() => {});
+    v.src = SOURCES[i];
+    v.load();
+    const t = setTimeout(() => {
+      v.play().catch(() => {});
+    }, 0);
 
-    return () => video.removeEventListener("ended", handleEnded);
+    return () => {
+      clearTimeout(t);
+      v.removeEventListener("ended", handleEnded);
+    };
   }, [i]);
 
   return (
@@ -30,13 +41,12 @@ function BackgroundVideo() {
       <video
         ref={videoRef}
         autoPlay
-        loop={false}
         muted
         playsInline
+        loop={false}
+        preload="auto"
         className="bg-video"
-      >
-        <source src="/ai1.mp4" type="video/mp4" />
-      </video>
+      />
     </div>
   );
 }

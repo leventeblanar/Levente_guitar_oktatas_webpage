@@ -16,7 +16,7 @@ export function HeroButton() {
     <a
       ref={btnRef}
       className="btn"
-      href="/cv.pdf"
+      href={`${import.meta.env.BASE_URL}cv.pdf`}
       download
       onMouseMove={handleMouseMove}
     >

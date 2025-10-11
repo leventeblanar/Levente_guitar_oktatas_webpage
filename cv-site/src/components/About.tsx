@@ -31,7 +31,7 @@ export default function About() {
       <div className="about-noise" />
       <div className="container about-wrap">
         <div className="about-photo">
-          <img src="/profile.jpg" alt="Portrait" loading="lazy" />
+          <img src={`${import.meta.env.BASE_URL}profile.jpg`} />
         </div>
 
         <div className="about-content">
