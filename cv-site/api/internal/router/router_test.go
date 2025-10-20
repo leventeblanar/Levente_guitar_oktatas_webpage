@@ -1,7 +1,6 @@
 package router_test
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +10,7 @@ import (
 
 func TestRouterHealthz(t *testing.T) {
 
-	r := router.NewRouter()
+	r := router.NewRouter(nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	w := httptest.NewRecorder()
@@ -19,6 +18,6 @@ func TestRouterHealthz(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusOK {
-		log.Fatalf("expected 200 OK, got %d", w.Code)
+		t.Fatalf("expected 200 OK, got %d", w.Code)
 	}
 }

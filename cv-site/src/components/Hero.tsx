@@ -25,14 +25,18 @@ export function HeroButton() {
   );
 }
 
+const reduce =
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
 export default function Hero() {
   return (
     <section className="hero">
       <motion.div
         className="hero-name"
-        initial={{ opacity: 0, x: -80 }}
+        initial={reduce ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
         whileInView={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: reduce ? 0 : 0.5, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
       >
         <h1>LEVENTE BLANÁR</h1>
@@ -40,9 +44,9 @@ export default function Hero() {
 
       <motion.div
         className="hero-info"
-        initial={{ opacity: 0, x: 80 }}
+        initial={reduce ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
         whileInView={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
+        transition={{ delay: reduce ? 0 : 0.15, duration: reduce ? 0 : 0.5, ease: "easeOut" }}
         viewport={{ once: true, amount: 0.3 }}
       >
         <h2>Junior Developer</h2>

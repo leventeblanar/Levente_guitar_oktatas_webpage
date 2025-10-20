@@ -1,66 +1,103 @@
-type Job = {
-    company:    string;
-    role:       string;
-    period:     string;
-    bullets:    string[];
-    tags?:      string[];
-}
+import { useEffect, useState } from "react";
 
-const jobs: Job[] = [
-    {
-        company: "DataEdge Kft.",
-        role: "Junior Developer (Intern)",
-        period: "2025 Jan — 2025 Oct",
-        bullets: [
-        "Developed Python scripts using FastAPI, SQLAlchemy, and Pandas to automate data validation and reporting",
-        "Integrated APIs between systems such as Hermes, Atlas, and TEDI, handling both REST and file-based data exchange",
-        "Designed SQL queries and views in PostgreSQL, optimizing data consistency and performance",
-        "Built and refactored Python CLI utilities for internal teams, improving code structure and maintainability",
-        "Collaborated with colleagues through Git, Docker, and VS Code Remote Containers for environment parity",
-        "Used Postman and Swagger UI for API testing and documentation",
-        "Assisted in debugging data pipelines and automating reconciliation tasks using Pandas and Excel exporters",
-        "Participated in migrating old PHP reports to modern Python-based scripts",
-        ],
-        tags: ["Python", "FastAPI", "PostgreSQL", "SQLAlchemy", "Pandas", "Go", "Docker", "Git", "Postman", "Swagger UI", "VS Code", "Streamlit", "Linux"]
-    },
-];
+type Job = {
+  id: number;
+  company: string;
+  position: string;
+  period: string;
+  bullets: string[];
+  tags?: string[];
+};
 
 export default function About() {
-    return (
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const endpoint =
+    (import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "") + "/jobs";
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      try {
+        const res = await fetch(endpoint, { signal: controller.signal });
+        if (!res.ok) {
+          throw new Error(`API returned ${res.status}`);
+        }
+        const payload: Job[] = await res.json();
+        setJobs(payload);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error("Failed to fetch jobs", err);
+          setError("Nem sikerült betölteni a tapasztalatokat.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, [endpoint]);
+
+  const hasJobs = jobs.length > 0;
+
+  return (
     <section id="about" className="section-about">
       <div className="about-noise" />
       <div className="container about-wrap">
         <div className="about-photo">
-          <img src={`${import.meta.env.BASE_URL}profile.jpg`} />
+          <img
+            src={`${import.meta.env.BASE_URL}profile.jpg`}
+            alt="Portrait"
+            loading="lazy"
+            width={800}
+            height={1000}
+          />
         </div>
 
         <div className="about-content">
           <h3>About</h3>
           <p className="about-lead">
-            Backend- and data science developer.
-            Python/Go, SQL, FastAPI, Pandas.
+            Backend- and data science developer. Python/Go, SQL, FastAPI, Pandas.
           </p>
 
           <div className="about-cards">
-            {jobs.map((j, i) => (
-              <article className="about-card" key={i}>
-                <div className="about-card__head">
-                  <span className="about-card__period">{j.period}</span>
-                  <div className="about-card__company">{j.company}</div>
-                  <h4>{j.role}</h4>
-                </div>
-
-                <ul className="about-card__list">
-                  {j.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
-                </ul>
-
-                {j.tags && (
-                  <div className="about-card__tags">
-                    {j.tags.map((t) => <span key={t} className="tag">{t}</span>)}
+            {loading && <p>Betöltés...</p>}
+            {error && !loading && <p className="about-error">{error}</p>}
+            {!loading && !error && !hasJobs && (
+              <p>Még nincsenek megjeleníthető tapasztalatok.</p>
+            )}
+            {hasJobs &&
+              jobs.map((job) => (
+                <article className="about-card" key={job.id}>
+                  <div className="about-card__head">
+                    <span className="about-card__period">{job.period}</span>
+                    <div className="about-card__company">{job.company}</div>
+                    <h4>{job.position}</h4>
                   </div>
-                )}
-              </article>
-            ))}
+
+                  <ul className="about-card__list">
+                    {job.bullets.map((bullet, idx) => (
+                      <li key={idx}>{bullet}</li>
+                    ))}
+                  </ul>
+
+                  {job.tags && job.tags.length > 0 && (
+                    <div className="about-card__tags">
+                      {job.tags.map((tag) => (
+                        <span key={tag} className="tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
           </div>
         </div>
       </div>
